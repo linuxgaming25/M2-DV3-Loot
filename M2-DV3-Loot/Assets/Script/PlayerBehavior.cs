@@ -9,6 +9,9 @@ public class PlayerBehaviour : MonoBehaviour
     public float rotateSpeed = 75f;
     public float jumpVelocity = 5f;
 
+    public delegate void JumpingEvent();
+
+    public event JumpingEvent playerJump;
     public bool demoKinematicMovement = false;
 
     public float distanceToGround = 0.1f;
@@ -79,7 +82,7 @@ public class PlayerBehaviour : MonoBehaviour
         {
             _rb.AddForce(Vector3.up * jumpVelocity, ForceMode.Impulse);
             doJump = false;
-            //playerJump();
+            playerJump();
         }
 
         Vector3 rotation = Vector3.up * hInput;

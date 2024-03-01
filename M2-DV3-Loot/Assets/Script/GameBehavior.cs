@@ -16,20 +16,48 @@ public class GameBehavior : MonoBehaviour, IManager
     void Start()
     {
         Initialize();
+
+        InventoryList<string> inventoryList = new InventoryList<string>();
+
+        inventoryList.SetItem("Potion");
+        Debug.Log(inventoryList.item);
     }
 
+    public delegate void DebugDelegate(string newText);
+
+    public DebugDelegate debug = Print;
     public Stack<string> lootStack = new Stack<string>();
     public void Initialize()
      {
         _state = "Manager intialized..";
         _state.FancyDebug();
-        Debug.Log(_state);
+
+        debug(_state);
+        LogWithDelegate(debug);
 
         lootStack.Push("Sword of Doom");
         lootStack.Push("HP+");
         lootStack.Push("Golden Key");
         lootStack.Push("Winged Boot");
         lootStack.Push("Mythril Bracers");
+
+        GameObject player = GameObject.Find("Player");
+        PlayerBehaviour playerBehavior = player.GetComponent<PlayerBehaviour>();
+        playerBehavior.playerJump += HandlePlayerJump;
+    }
+
+    public void HandlePlayerJump()
+    {
+        debug("Player has jumped..");
+    }
+    public static void Print(string newText)
+    {
+        Debug.Log(newText);
+    }
+
+    public void LogWithDelegate(DebugDelegate del)
+    {
+        del("Delegating the debug task...");
     }
 
     public bool showWinScreen = false;
@@ -150,7 +178,21 @@ public class GameBehavior : MonoBehaviour, IManager
             {
                 SceneManager.LoadScene(0);
                 Time.timeScale = 1.0f;
-                Utilities.RestartLevel(0);
+                try
+                {
+                    Utilities.RestartLevel(-1);
+                    debug("Level restarted successfully...");
+                }
+                catch (System.ArgumentException e)
+                {
+                    Utilities.RestartLevel(0);
+                    debug("Reverting to scene 0: " + e.ToString());
+                }
+                finally
+                {
+                    debug("Restart handled...");
+                }
+                
             }
         }
 
